@@ -4,14 +4,13 @@ const Pagination = ({ curr, total }) => (
   <div className="pagination">{`${curr} / ${total}`}</div>
 );
 
-const Table = ({ data, headers, curr, total, ...rest }) => {
+const Table = ({ data, headers, curr, total, rowsCount, ...rest }) => {
   const [tableHeight, setTableHeight] = useState("0px");
   let wrapperRef = useRef(null);
   const paginationH = 32;
   const headerH = 32;
   const borderH = 1;
   const borderW = headers.length;
-  const rowsCount = 15;
 
   useEffect(() => {
     const getBodyRowHeight = (wrapperHeight) =>
@@ -45,7 +44,7 @@ const Table = ({ data, headers, curr, total, ...rest }) => {
             data.map((row, index) => (
               <tr key={row} style={styles.bodyRow}>
                 {row.map((v, i, arr) =>
-                  i !== 6 ? (
+                  i !== 0 ? (
                     <td key={v.slice(0, 5) + i} style={styles.tableCell}>
                       {v || "-"}
                     </td>

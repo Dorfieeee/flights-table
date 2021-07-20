@@ -1,50 +1,57 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 const headers = [
-  "FlightNo",
-  "Date",
-  "Time",
-  "PortOfCallA",
-  "Status",
-  "Airline",
-  "Image"
+    "Image",
+    "FlightNo",
+    "Date",
+    "Time",
+    "PortOfCallA",
+    "Status",
+    //"Airline",
 ];
 
 const filteredFlights = (flights) => {
-  return flights.reduce((list, flight) => {
-    return list.concat([
-      headers.map((header) => {
-        return flight[header];
-      })
-    ]);
-  }, []);
+    return flights.reduce((list, flight) => {
+        return list.concat([
+            headers.map((header) => {
+                return flight[header];
+            }),
+        ]);
+    }, []);
 };
 
-const useFlights = (type, timeStamp) => {
-  const URL = "https://kabrudlev2.edinburghairport.com/api/flights/" + type;
-  const [flights, setFlights] = useState(null);
+const useFlights = (type) => {
+    const URL = "https://kabrudlev2.edinburghairport.com/api/flights/" + type;
+    const [flights, setFlights] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
 
-  const fetchArrivals = useCallback(async () => {
-    let apiResponse, flights;
-    try {
-      apiResponse = await fetch(URL);
-      if (!apiResponse.ok) {
-        throw new Error(apiResponse.statusText);
-      }
-      flights = await apiResponse.json();
-      if (!flights) {
-        throw new Error("Arrivals JSON parse was not successfull.");
-      }
-    } catch (error) {
-      console.error(error);
-      return;
-    }
-    setFlights(filteredFlights(flights));
-  }, [URL]);
+    const fetchArrivals = useCallback(async () => {
+        let apiResponse, flights;
 
-  useEffect(() => fetchArrivals(), [fetchArrivals, timeStamp]);
+        setLoading(true);
+        setError(null);
 
-  return [flights, fetchArrivals];
+        try {
+            apiResponse = await fetch(URL);
+            if (!apiResponse.ok) {
+                throw new Error(apiResponse.statusText);
+            }
+            flights = await apiResponse.json();
+            if (!flights) {
+                throw new Error("Arrivals JSON parse was not successfull.");
+            }
+        } catch (error) {
+            setLoading(false);
+            setError(error);
+            return;
+        }
+
+        setFlights(filteredFlights(flights));
+        setLoading(false);
+    }, [URL]);
+
+    return [flights, fetchArrivals, loading, error];
 };
 
 export default useFlights;
